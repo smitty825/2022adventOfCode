@@ -14,6 +14,7 @@ enum RPS {
 }
 
 
+
 fn convertToRPS(play: &str) -> Option<RPS> {
     use crate::RPS::*; 
     match play {
@@ -33,22 +34,52 @@ fn isBeatenBy(hand: RPS) -> RPS {
     }
 }
 
+fn needsToBeat(play: RPS) -> RPS {
+    use crate::RPS::*; 
+    match play {
+        Rock => return Scissors,
+        Paper => return Rock,
+        Scissors => return Paper
+    } 
+}
+
+fn getStrategy(strategyCode: &str) -> Option<Result> {
+    use crate::Result::*;
+    match strategyCode {
+        "X" => Some(Loss),
+        "Y" => Some(Draw),
+        "Z" => Some(Win), 
+        _ => None 
+    }
+}
+
+fn figureOutPlay(elfPlay: RPS, strategy: Result) -> RPS {
+    match strategy { 
+        Result::Win => return isBeatenBy(elfPlay),
+        Result::Loss => return needsToBeat(elfPlay),
+        Result::Draw => return elfPlay
+    }
+}
+
 fn compare_hands(elf: &str, me: &str) -> Result{
-    use crate::Result::*; 
     let elfMove : RPS = convertToRPS(elf).unwrap();
     let myMove : RPS = convertToRPS(me).unwrap();
 
-    let is_beaten_by = isBeatenBy(myMove);
-    if elfMove == is_beaten_by {
+    return compare_hands_RPS(elfMove, myMove);
+}
+
+fn compare_hands_RPS(elf: RPS, me: RPS) -> Result {
+    use crate::Result::*; 
+    let is_beaten_by = isBeatenBy(me);
+    if elf == is_beaten_by {
         return Loss; 
-    } else if elfMove == myMove {
+    } else if elf == me {
         return Draw;
     }
     else {
         return Win;
     }
 }
-
 
 
 
@@ -75,7 +106,30 @@ pub fn part_one(input: &str) -> Option<u32> {
 }
 
 pub fn part_two(input: &str) -> Option<u32> {
-    None
+    let lines = input.lines();
+
+    let mut totalPoints:u32 = 0; 
+
+    for line in lines {
+        let mut split = line.split(" ");
+        let elf : &str = split.next().unwrap();
+        let me : &str = split.next().unwrap(); 
+
+        let elfPlay = convertToRPS(elf).unwrap(); 
+        let strategy  = getStrategy(me).unwrap(); 
+        let myPlay : RPS = figureOutPlay(elfPlay, strategy);
+
+        let result = compare_hands_RPS(elfPlay, myPlay);
+
+        let hand_points : u32 = myPlay as u32; 
+        let result_points : u32 = result as u32; 
+
+        totalPoints = totalPoints + hand_points + result_points; 
+
+    }
+
+    return Some(totalPoints);
+
 }
 
 fn main() {
