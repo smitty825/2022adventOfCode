@@ -17,7 +17,7 @@ fn get_assignments(input: &str) -> (Assignment,Assignment) {
     return (first_assignment, second_assignment);
 }
 
-fn is_overlap(first_elf: Assignment, second_elf: Assignment) -> bool {
+fn is_complete_overlap(first_elf: Assignment, second_elf: Assignment) -> bool {
     let mut overlap_detect = false; 
     if first_elf.first_section <= second_elf.first_section && 
        first_elf.last_section >= second_elf.last_section {
@@ -31,6 +31,20 @@ fn is_overlap(first_elf: Assignment, second_elf: Assignment) -> bool {
     return overlap_detect
 }
 
+fn is_any_overlap(first_elf: Assignment, second_elf: Assignment) -> bool {
+    let mut overlap_detect = false; 
+
+    if (first_elf.first_section >= second_elf.first_section && first_elf.first_section <= second_elf.last_section) ||
+       (first_elf.last_section >= second_elf.first_section && first_elf.last_section <= second_elf.last_section) {
+        overlap_detect = true; 
+       }
+    else if is_complete_overlap(first_elf, second_elf) {
+        overlap_detect = true; 
+    }
+
+    return overlap_detect; 
+}
+
 pub fn part_one(input: &str) -> Option<u32> {
     let mut total_overlaps = 0;
     let lines = input.lines();
@@ -38,7 +52,7 @@ pub fn part_one(input: &str) -> Option<u32> {
         // First step...get the assignments in a better form to compare
         let these_assignment = get_assignments(assignments); 
 
-        if is_overlap( these_assignment.0, these_assignment.1) {
+        if is_complete_overlap( these_assignment.0, these_assignment.1) {
             total_overlaps += 1; 
         }
     }
@@ -47,7 +61,17 @@ pub fn part_one(input: &str) -> Option<u32> {
 }
 
 pub fn part_two(input: &str) -> Option<u32> {
-    None
+    let mut total_overlaps = 0;
+    let lines = input.lines();
+    for assignments in lines {
+        // First step...get the assignments in a better form to compare
+        let these_assignment = get_assignments(assignments); 
+
+        if is_any_overlap( these_assignment.0, these_assignment.1) {
+            total_overlaps += 1; 
+        }
+    }
+    return Some(total_overlaps);
 }
 
 fn main() {
