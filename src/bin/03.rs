@@ -41,7 +41,7 @@ pub fn part_one(input: &str) -> Option<u32> {
     let lines = input.lines();
     for rucksack in lines {
         // First step...split the rucksack into compartments
-        let mut compartments = split_rucksack_into_compartments(rucksack);
+        let compartments = split_rucksack_into_compartments(rucksack);
 
         // next find shared items 
         let shared_chars : Vec<char> = find_shared_characters(compartments);
@@ -55,7 +55,22 @@ pub fn part_one(input: &str) -> Option<u32> {
 }
 
 pub fn part_two(input: &str) -> Option<u32> {
-    None
+    let mut total_score : u32 = 0; 
+    let mut lines = input.lines(); 
+    while let Some(first) = lines.next() {
+        let second = lines.next(); 
+        let third = lines.next(); 
+
+        let rsp = find_shared_characters([first, second.unwrap()]); 
+        let first_set = String::from_iter(rsp.iter()); 
+
+        let rsp2 = find_shared_characters([third.unwrap(), &first_set]);
+
+        total_score = total_score + calculate_values(rsp2); 
+
+    }
+
+    return Some(total_score); 
 }
 
 fn main() {
